@@ -75,9 +75,22 @@ class Platform:
     def list_challenges(self):
         return self.call("list-challenges").get("challenges") or []
 
-    def prepare_submission(self, challenge_id, repo_url):
-        return self.call("prepare-submission",
-                         {"challengeId": challenge_id, "githubRepoUrl": repo_url})
+    def prepare_submission(self, challenge_id, repo_url, workdir=None,
+                           required_deliverables=None, project_title=None):
+        """平台侧 workdir / requiredDeliverables / projectTitle 都参与预检。
+
+        真实事故（C8）：早期版本只封装 challengeId + githubRepoUrl，调用即报
+        「workdir 与 requiredDeliverables 必填」；补上后 actionItems 又只剩
+        「提供项目名称（projectTitle）」。三个参数都要透传，缺一个 ready 就不会是 true。
+        """
+        payload = {"challengeId": challenge_id, "githubRepoUrl": repo_url}
+        if workdir:
+            payload["workdir"] = workdir
+        if required_deliverables:
+            payload["requiredDeliverables"] = required_deliverables
+        if project_title:
+            payload["projectTitle"] = project_title
+        return self.call("prepare-submission", payload)
 
     def submit_project(self, payload):
         return self.call("submit-project", payload)
