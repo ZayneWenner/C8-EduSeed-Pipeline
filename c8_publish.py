@@ -3,6 +3,7 @@ import io
 import json
 import os
 import sys
+import urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -40,7 +41,8 @@ mismatch = 0
 for rel in sorted(uploaded):
     local = os.path.getsize(os.path.join(HERE, rel.replace("/", os.sep)))
     try:
-        meta = gh._request("GET", "/repos/%s/%s/contents/%s" % (OWNER, REPO, rel))
+        meta = gh._request("GET", "/repos/%s/%s/contents/%s"
+                           % (OWNER, REPO, urllib.parse.quote(rel)))
         remote = meta.get("size")
     except GitHubError as exc:
         print("  MISS", rel, exc.status)
